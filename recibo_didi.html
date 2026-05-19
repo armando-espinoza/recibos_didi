@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiDi Receipt Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+:root{--didi:#FF6C2F;--bg:#ECECEC;--white:#fff;--border:#E8E8E8;--text:#1A1A1A;--mid:#555;--light:#999;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1px solid #e0e0e0;padding:13px 28px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:200;box-shadow:0 1px 6px rgba(0,0,0,.07);}
+.topbar-icon{width:30px;height:30px;background:var(--didi);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.topbar h1{font-size:16px;font-weight:700;}
+.topbar-sub{font-size:12px;color:var(--light);margin-left:2px;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:370px 1fr;min-height:calc(100vh - 56px);}
+
+/* FORM */
+.form-panel{background:#fff;border-right:1px solid var(--border);padding:24px 20px;overflow-y:auto;height:calc(100vh - 56px);position:sticky;top:56px;}
+.fsec{margin-bottom:22px;}
+.fsec-title{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#aaa;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.field{margin-bottom:10px;}
+.field label{display:block;font-size:11.5px;font-weight:600;color:#777;margin-bottom:3px;}
+.field input,.field select{width:100%;padding:8px 11px;border:1.5px solid #E5E5E5;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--text);background:#fff;outline:none;transition:border-color .14s;}
+.field input:focus,.field select:focus{border-color:var(--didi);}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.btn-main{width:100%;padding:12px;background:var(--didi);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;transition:background .13s,transform .1s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.btn-main:hover{background:#e05a1e;transform:translateY(-1px);}
+.btn-sm{font-size:12.5px;padding:9px;margin-top:8px;}
+
+/* PREVIEW */
+.preview-panel{padding:36px 40px;display:flex;flex-direction:column;align-items:center;overflow-y:auto;background:#DCDCDC;}
+.preview-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#888;margin-bottom:16px;align-self:flex-start;margin-left:max(0px,calc(50% - 195px));}
+.dl-row{margin-top:18px;display:flex;gap:10px;}
+.btn-pdf{padding:11px 22px;background:var(--didi);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 3px 12px rgba(255,108,47,.32);transition:background .13s,transform .1s;}
+.btn-pdf:hover{background:#e05a1e;transform:translateY(-1px);}
+
+/* OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#fff;font-family:'DM Sans',sans-serif;}
+.overlay.show{display:flex;}
+.spin{width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:var(--didi);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ════════════════════════════════
+   RECEIPT
+════════════════════════════════ */
+#receipt{width:390px;background:#fff;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,.16);font-family:-apple-system,'SF Pro Text','Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+
+.rc-logo-row{padding:15px 18px 0;}
+.rc-didi-dot{width:32px;height:32px;background:#FF6C2F;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.rc-date{font-size:12.5px;color:#888;padding:10px 18px 0;}
+.rc-greeting{font-size:20px;font-weight:700;color:#111;padding:6px 18px 0;line-height:1.28;}
+
+.rc-hero{height:108px;background:#fff;position:relative;overflow:hidden;}
+.rc-hero svg.cs{position:absolute;right:14px;bottom:5px;width:180px;height:100px;}
+
+.rc-total-row{padding:12px 18px 10px;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #F0F0F0;}
+.rc-total-label{font-size:15px;font-weight:700;color:#111;}
+.rc-total-val{font-size:20px;font-weight:700;color:#111;}
+
+.rc-breakdown{padding:13px 18px 12px;border-bottom:1px solid #F0F0F0;}
+.rc-section-head{font-size:12.5px;font-weight:700;color:#111;margin-bottom:7px;}
+.rc-row{display:flex;justify-content:space-between;margin-bottom:3.5px;}
+.rc-row .lbl{font-size:12px;color:#888;}
+.rc-row .val{font-size:12px;color:#888;}
+
+.rc-payment{padding:13px 18px 12px;border-bottom:1px solid #F0F0F0;}
+.rc-pay-inner{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+.rc-pay-left{display:flex;align-items:center;gap:8px;}
+.visa-badge{color:#fff;font-size:8px;font-weight:900;font-style:italic;letter-spacing:.02em;padding:3px 6px;border-radius:3px;font-family:'Arial Black',Arial,sans-serif;line-height:1;}
+.rc-estimated-label{font-size:13px;color:#555;}
+.rc-pay-amount{font-size:13px;color:#555;}
+
+.rc-auth-text{padding:11px 18px 12px;border-bottom:1px solid #F0F0F0;font-size:11px;color:#888;line-height:1.6;}
+
+.rc-question{padding:10px 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #F0F0F0;}
+.rc-q-icon{width:18px;height:18px;background:#F2F2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rc-question span{font-size:12.5px;color:#666;}
+.rc-chev{margin-left:auto;color:#CCC;font-size:14px;}
+
+.rc-trip{padding:15px 18px 0;}
+.rc-trip-header{display:flex;justify-content:space-between;margin-bottom:10px;}
+.rc-trip-title{font-size:15px;font-weight:700;color:#111;}
+.rc-trip-meta{font-size:12.5px;color:#888;}
+.rc-service-row{display:flex;align-items:center;gap:7px;margin-bottom:13px;}
+.rc-service-label{font-size:13px;font-weight:500;color:#444;}
+
+.rc-timeline{position:relative;padding-left:16px;margin-bottom:0;}
+.rc-tl-line{position:absolute;left:4px;top:8px;bottom:8px;width:1.5px;background:#DDD;}
+.rc-stop{position:relative;margin-bottom:13px;}
+.rc-stop:last-child{margin-bottom:0;}
+.rc-dot{position:absolute;left:-16px;top:4px;width:9px;height:9px;border-radius:50%;}
+.rc-dot.g{background:#34C759;}
+.rc-dot.o{background:#FF6C2F;}
+.rc-stop-time{font-size:11.5px;color:#999;}
+.rc-stop-addr{font-size:13px;font-weight:500;color:#1A1A1A;margin-top:1px;}
+
+/* MAP */
+.rc-map{margin:13px 0 0;height:130px;background:#e8eae8;position:relative;overflow:hidden;}
+#leaflet-map{width:100%;height:100%;pointer-events:none;}
+.rc-map-google{position:absolute;bottom:4px;right:6px;font-size:8.5px;color:#555;background:rgba(255,255,255,.85);padding:1px 4px;border-radius:2px;z-index:1000;pointer-events:none;}
+
+.rc-assist{padding:14px 18px 16px;border-top:1px solid #F0F0F0;}
+.rc-assist-title{font-size:14px;font-weight:700;color:#111;margin-bottom:7px;}
+.rc-assist-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;}
+.rc-assist-row span{font-size:13px;color:#555;}
+.rc-assist-row .chv{color:#CCC;font-size:14px;}
+
+/* hide Leaflet attribution inside receipt */
+.leaflet-control-attribution{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <div class="spin"></div>
+  <span>Generando PDF…</span>
+</div>
+
+<div class="topbar">
+  <div class="topbar-icon">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M6 4h5.5C15.6 4 19 7.4 19 12s-3.4 8-7.5 8H6V4zm3 3v10h2.5c2.5 0 4.5-2 4.5-5s-2-5-4.5-5H9z"/></svg>
+  </div>
+  <h1>DiDi Receipt Generator</h1>
+  <span class="topbar-sub">— generador de recibos</span>
+</div>
+
+<div class="layout">
+
+<!-- ══ FORM ══ -->
+<div class="form-panel">
+
+  <div class="fsec">
+    <div class="fsec-title">Pasajero &amp; Servicio</div>
+    <div class="field"><label>Nombre</label><input id="f-name" value="Javier"></div>
+    <div class="field"><label>Servicio</label>
+      <select id="f-service">
+        <option value="Express" selected>Express</option>
+        <option value="DiDi X">DiDi X</option>
+        <option value="DiDi XL">DiDi XL</option>
+        <option value="DiDi Plus">DiDi Plus</option>
+        <option value="DiDi Taxi">DiDi Taxi</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">Fecha y hora</div>
+    <div class="field"><label>Fecha</label><input id="f-date" type="date" value="2026-05-18"></div>
+    <div class="row2">
+      <div class="field"><label>Hora salida</label><input id="f-t1" type="time" value="07:17"></div>
+      <div class="field"><label>Hora llegada</label><input id="f-t2" type="time" value="07:43"></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">Ruta</div>
+    <div class="field"><label>Origen</label><input id="f-origin" value="Edificio La Lonja"></div>
+    <div class="field"><label>Destino</label><input id="f-dest" value="San Luis 4005"></div>
+    <div class="row2">
+      <div class="field"><label>Distancia (km)</label><input id="f-km" type="number" value="7.3" step="0.1"></div>
+      <div class="field"><label>Duración (min)</label><input id="f-min" type="number" value="21"></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">Tarifas (MXN)</div>
+    <div class="field"><label>Upfront Fare</label><input id="f-base" type="number" value="70.45" step="0.01"></div>
+    <div class="row2">
+      <div class="field"><label>Booking Fee</label><input id="f-booking" type="number" value="20.30" step="0.01"></div>
+      <div class="field"><label>Fuel Surcharge</label><input id="f-fuel" type="number" value="18.25" step="0.01"></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">Método de pago</div>
+    <div class="field"><label>Tipo de tarjeta</label>
+      <select id="f-card-type">
+        <option value="Visa" selected>Visa</option>
+        <option value="Mastercard">Mastercard</option>
+        <option value="Amex">Amex</option>
+        <option value="Efectivo">Efectivo</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Banco</label><input id="f-bank" value="BBVA"></div>
+      <div class="field"><label>Últimos 4 dígitos</label><input id="f-card4" value="4521" maxlength="4"></div>
+    </div>
+  </div>
+
+  <div class="fsec">
+    <div class="fsec-title">Mapa (dirección)</div>
+    <div class="field">
+      <label>Ciudad (contexto)</label>
+      <input id="f-city" value="Culiacán, Sinaloa, México" placeholder="ej. Ciudad de México">
+    </div>
+    <div class="field">
+      <label>Dirección de origen</label>
+      <input id="f-addr1" value="Edificio La Lonja, Culiacán, Sinaloa">
+    </div>
+    <div class="field">
+      <label>Dirección de destino</label>
+      <input id="f-addr2" value="San Luis 4005, Culiacán, Sinaloa">
+    </div>
+    <button class="btn-main btn-sm" id="btn-geocode" onclick="geocodeAndRefresh()">
+      🗺️ Buscar direcciones y actualizar mapa
+    </button>
+    <div id="geocode-status" style="font-size:11px;color:#888;margin-top:6px;min-height:16px;"></div>
+    <!-- hidden coord fields still used by map logic -->
+    <input type="hidden" id="f-lat1" value="24.8086">
+    <input type="hidden" id="f-lng1" value="-107.3940">
+    <input type="hidden" id="f-lat2" value="24.7952">
+    <input type="hidden" id="f-lng2" value="-107.4087">
+  </div>
+
+  <button class="btn-main" onclick="updateReceipt()">
+    <svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+    Actualizar recibo
+  </button>
+
+</div>
+
+<!-- ══ PREVIEW ══ -->
+<div class="preview-panel">
+  <div class="preview-label">Vista previa del recibo</div>
+
+  <div id="receipt">
+
+    <!-- Logo -->
+    <div class="rc-logo-row">
+      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAaABkDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABQYDAQj/xAArEAABAwIEBAUFAAAAAAAAAAABAgMEABEFBhIhEzFBURQyYYGhFSJCRXH/xAAWAQEBAQAAAAAAAAAAAAAAAAAEBQP/xAAiEQACAgICAgIDAAAAAAAAAAABAgMEABEhMUFxBRJRgfH/2gAMAwEAAhEDEQA/APT3jGoitMmcAtzc8V7ST0uBew9hau/VoCf2bCz244sPmo3OzEV/OeFomI0xHGw2q6iLnUrr/SKYVk/LqUFSohAAuSXl7fNTRasySOsajSnXJI8b/ByuadSKKN5WbbjfABHevJGNuuvrAksPqU4E3QNZ0K62I5WPe1+1NVA5ExCTOE5K3NcRhaW432gWSL7X67aedX1NqzixEJF6OT7tZqsxibsf3AMbg4ZmSAlmenSrzNyWeaT39RQL2ScacbEZ3MTz8D0B3T2N1be9XCY8dK1rSw0FLN1EIF1Hue9aIAbvoGm/O216ymoQTN9nHPsjfvXebV/k7NdPojceNgHXrY4/WBYfCgYLhYjwkpWW/Kk/mr0v5lE7b09WYYY4we4LfFAsF6RqAPPetKXGiooVRoDBSSNIxZjsnP/Z" style="width:32px;height:32px;object-fit:contain;display:block;" alt="DiDi logo">
+    </div>
+
+    <div class="rc-date" id="rc-date">Mon, 18 May, 2026</div>
+    <div class="rc-greeting" id="rc-greeting">Tavo, thanks for riding with Express</div>
+
+    <!-- Hero car illustration -->
+    <div class="rc-hero" style="padding:0;background:#EEF0F5;">
+      <img src="data:image/png;base64,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" style="width:100%;height:100%;object-fit:cover;display:block;" alt="DiDi ride illustration">
+    </div>
+
+    <!-- Total -->
+    <div class="rc-total-row">
+      <span class="rc-total-label">Total</span>
+      <span class="rc-total-val" id="rc-total">MXN$109.00</span>
+    </div>
+
+    <!-- Fare Breakdown -->
+    <div class="rc-breakdown">
+      <div class="rc-section-head">Fare Breakdown</div>
+      <div class="rc-row"><span class="lbl">Upfront Fare</span><span class="val" id="rc-base">MXN$70.45</span></div>
+      <div class="rc-row"><span class="lbl">Duration</span><span class="val" id="rc-dur">21 min</span></div>
+      <div class="rc-row"><span class="lbl">Booking Fee</span><span class="val" id="rc-booking">MXN$20.30</span></div>
+      <div class="rc-row"><span class="lbl">Fuel Surcharge</span><span class="val" id="rc-fuel">MXN$18.25</span></div>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="rc-payment">
+      <div class="rc-section-head">Payment Method</div>
+      <div class="rc-pay-inner">
+        <div class="rc-pay-left">
+          <div class="visa-badge" id="rc-card-badge" style="background:#1A1F71;">VISA</div>
+          <span class="rc-estimated-label" id="rc-card-label">Estimated Fare &nbsp;•••• 4521</span>
+        </div>
+        <span class="rc-pay-amount" id="rc-pay-amount">-MXN$109.00</span>
+      </div>
+    </div>
+
+    <!-- Auth hold text -->
+    <div class="rc-auth-text" id="rc-auth-text">
+      To make sure you're using a valid payment method, we placed a temporary
+      authorization hold of <strong>MXN$109.00</strong> on your account at the start of your trip. Your trip
+      was paid for using this hold amount.
+    </div>
+
+    <!-- Question about fare -->
+    <div class="rc-question">
+      <div class="rc-q-icon">
+        <svg width="11" height="11" fill="#999" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+      </div>
+      <span>Question about Fare</span>
+      <span class="rc-chev">›</span>
+    </div>
+
+    <!-- Trip Details -->
+    <div class="rc-trip">
+      <div class="rc-trip-header">
+        <span class="rc-trip-title">Trip Details</span>
+        <span class="rc-trip-meta" id="rc-trip-meta">7.3 km | 21 min</span>
+      </div>
+      <div class="rc-service-row">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="#666"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        <span class="rc-service-label" id="rc-service">Express</span>
+      </div>
+      <div class="rc-timeline">
+        <div class="rc-tl-line"></div>
+        <div class="rc-stop">
+          <div class="rc-dot g"></div>
+          <div class="rc-stop-time" id="rc-t1">07:17 am</div>
+          <div class="rc-stop-addr" id="rc-origin">Edificio La Lonja</div>
+        </div>
+        <div class="rc-stop">
+          <div class="rc-dot o"></div>
+          <div class="rc-stop-time" id="rc-t2">07:43 am</div>
+          <div class="rc-stop-addr" id="rc-dest">San Luis 4005</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="rc-map" id="rc-map-wrap">
+      <div id="leaflet-map"></div>
+      <div class="rc-map-google">©OpenStreetMap</div>
+    </div>
+
+    <!-- Further Assistance -->
+    <div class="rc-assist">
+      <div class="rc-assist-title">Further Assistance</div>
+      <div class="rc-assist-row"><span>Help Center</span><span class="chv">›</span></div>
+    </div>
+
+  </div><!-- /receipt -->
+
+  <div class="dl-row">
+    <button class="btn-pdf" onclick="downloadPDF()">
+      <svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+      Descargar PDF
+    </button>
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<script>
+/* ── LEAFLET MAP ─────────────────────────── */
+let lmap = null, routeL = null, markerA = null, markerB = null;
+
+function initMap() {
+  const lat1 = parseFloat(document.getElementById('f-lat1').value);
+  const lng1 = parseFloat(document.getElementById('f-lng1').value);
+  const lat2 = parseFloat(document.getElementById('f-lat2').value);
+  const lng2 = parseFloat(document.getElementById('f-lng2').value);
+  const mid  = [(lat1+lat2)/2, (lng1+lng2)/2];
+
+  if (!lmap) {
+    lmap = L.map('leaflet-map', {
+      zoomControl:false, attributionControl:false,
+      dragging:false, scrollWheelZoom:false,
+      doubleClickZoom:false, touchZoom:false, keyboard:false
+    }).setView(mid, 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19, crossOrigin:'anonymous'
+    }).addTo(lmap);
+  }
+
+  if (routeL) lmap.removeLayer(routeL);
+  if (markerA) lmap.removeLayer(markerA);
+  if (markerB) lmap.removeLayer(markerB);
+
+  routeL = L.polyline([[lat1,lng1],[mid[0],mid[1]],[lat2,lng2]], {
+    color:'#4A90D9', weight:4, opacity:.9
+  }).addTo(lmap);
+
+  markerA = L.circleMarker([lat1,lng1], {
+    radius:6, fillColor:'#34C759', color:'#fff', weight:2.5, fillOpacity:1
+  }).addTo(lmap);
+
+  markerB = L.circleMarker([lat2,lng2], {
+    radius:6, fillColor:'#FF6C2F', color:'#fff', weight:2.5, fillOpacity:1
+  }).addTo(lmap);
+
+  lmap.fitBounds([[lat1,lng1],[lat2,lng2]], {padding:[20,20]});
+  setTimeout(() => lmap.invalidateSize(), 150);
+}
+
+function refreshMap() { initMap(); }
+
+/* ── HELPERS ─────────────────────────────── */
+const fmt = n => 'MXN$' + parseFloat(n||0).toFixed(2);
+
+function fmtDate(s) {
+  if (!s) return '';
+  const d = new Date(s+'T12:00:00');
+  const D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${D[d.getDay()]}, ${d.getDate()} ${M[d.getMonth()]}, ${d.getFullYear()}`;
+}
+function fmtTime(t) {
+  if (!t) return '';
+  let [h,m] = t.split(':').map(Number);
+  const ap = h>=12?'pm':'am';
+  if(h>12) h-=12; if(h===0) h=12;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ap}`;
+}
+
+/* ── UPDATE ──────────────────────────────── */
+function updateReceipt() {
+  const name    = document.getElementById('f-name').value    || 'Guest';
+  const service = document.getElementById('f-service').value;
+  const date    = document.getElementById('f-date').value;
+  const t1      = document.getElementById('f-t1').value;
+  const t2      = document.getElementById('f-t2').value;
+  const origin  = document.getElementById('f-origin').value;
+  const dest    = document.getElementById('f-dest').value;
+  const km      = parseFloat(document.getElementById('f-km').value)      || 0;
+  const min_v   = parseInt(document.getElementById('f-min').value)        || 0;
+  const base    = parseFloat(document.getElementById('f-base').value)    || 0;
+  const booking = parseFloat(document.getElementById('f-booking').value) || 0;
+  const fuel    = parseFloat(document.getElementById('f-fuel').value)    || 0;
+  const cardType= document.getElementById('f-card-type').value;
+  const card4   = document.getElementById('f-card4').value   || '0000';
+
+  const total   = base + booking + fuel;
+  const fTotal  = fmt(total);
+
+  // card badge color
+  const badge = document.getElementById('rc-card-badge');
+  const isCash = cardType === 'Efectivo';
+  const cardColors = {Visa:'#1A1F71',Mastercard:'#B32429',Amex:'#006FCF'};
+  badge.style.background = isCash ? '#4CAF50' : (cardColors[cardType]||'#333');
+  badge.textContent = isCash ? '$' : cardType.toUpperCase();
+
+  document.getElementById('rc-card-label').textContent = isCash
+    ? 'Efectivo'
+    : `Estimated Fare \u00a0\u00a0\u2022\u2022\u2022\u2022 ${card4}`;
+
+  // auth hold text
+  document.getElementById('rc-auth-text').innerHTML =
+    `To make sure you\u2019re using a valid payment method, we placed a temporary ` +
+    `authorization hold of <strong>${fTotal}</strong> on your account at the start of your trip. Your trip ` +
+    `was paid for using this hold amount.`;
+
+  document.getElementById('rc-date').textContent      = fmtDate(date);
+  document.getElementById('rc-greeting').textContent  = `${name}, thanks for riding with ${service}`;
+  document.getElementById('rc-total').textContent     = fTotal;
+  document.getElementById('rc-base').textContent      = fmt(base);
+  document.getElementById('rc-dur').textContent       = `${min_v} min`;
+  document.getElementById('rc-booking').textContent   = fmt(booking);
+  document.getElementById('rc-fuel').textContent      = fmt(fuel);
+  document.getElementById('rc-pay-amount').textContent= '-'+fTotal;
+  document.getElementById('rc-trip-meta').textContent = `${km} km | ${min_v} min`;
+  document.getElementById('rc-service').textContent   = service;
+  document.getElementById('rc-t1').textContent        = fmtTime(t1);
+  document.getElementById('rc-t2').textContent        = fmtTime(t2);
+  document.getElementById('rc-origin').textContent    = origin;
+  document.getElementById('rc-dest').textContent      = dest;
+}
+
+document.querySelectorAll('input,select').forEach(el => el.addEventListener('input', updateReceipt));
+
+/* ── PDF ─────────────────────────────────── */
+async function downloadPDF() {
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('show');
+  await new Promise(r => setTimeout(r, 150));
+
+  try {
+    const receipt = document.getElementById('receipt');
+    const W = receipt.offsetWidth;   // 390
+    const H = receipt.offsetHeight;
+
+    const canvas = await html2canvas(receipt, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: W,
+      height: H,
+      windowWidth: W,
+    });
+
+    const { jsPDF } = window.jspdf;
+
+    // 1px = 0.264583 mm at 96dpi
+    const PX2MM = 0.264583;
+    const wMM = W * PX2MM;
+    const hMM = H * PX2MM;
+
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [wMM, hMM],
+      compress: true,
+    });
+
+    const img = canvas.toDataURL('image/jpeg', 0.95);
+    pdf.addImage(img, 'JPEG', 0, 0, wMM, hMM);
+
+    const name = document.getElementById('f-name').value || 'recibo';
+    const date = document.getElementById('f-date').value || '';
+    pdf.save(`DiDi_Receipt_${name}_${date}.pdf`);
+
+  } catch(e) {
+    alert('Error al generar PDF:\n' + e.message);
+    console.error(e);
+  } finally {
+    overlay.classList.remove('show');
+  }
+}
+
+/* ── GEOCODE ─────────────────────────────── */
+async function geocode(address) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+  const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+  const data = await res.json();
+  if (data && data.length > 0) {
+    return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+  }
+  return null;
+}
+
+async function geocodeAndRefresh() {
+  const status  = document.getElementById('geocode-status');
+  const btn     = document.getElementById('btn-geocode');
+  const addr1   = document.getElementById('f-addr1').value;
+  const addr2   = document.getElementById('f-addr2').value;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Buscando…';
+  status.textContent = '';
+
+  try {
+    const [r1, r2] = await Promise.all([geocode(addr1), geocode(addr2)]);
+
+    if (!r1) { status.textContent = `❌ No encontré: "${addr1}"`; return; }
+    if (!r2) { status.textContent = `❌ No encontré: "${addr2}"`; return; }
+
+    document.getElementById('f-lat1').value = r1.lat;
+    document.getElementById('f-lng1').value = r1.lng;
+    document.getElementById('f-lat2').value = r2.lat;
+    document.getElementById('f-lng2').value = r2.lng;
+
+    status.textContent = `✅ Encontrado: (${r1.lat.toFixed(4)}, ${r1.lng.toFixed(4)}) → (${r2.lat.toFixed(4)}, ${r2.lng.toFixed(4)})`;
+    initMap();
+  } catch(e) {
+    status.textContent = '❌ Error de conexión al geocodificar.';
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🗺️ Buscar direcciones y actualizar mapa';
+  }
+}
+
+/* ── INIT ──────────────────────────────── */
+window.addEventListener('load', () => {
+  updateReceipt();
+  setTimeout(initMap, 200);
+});
+</script>
+</body>
+</html>
