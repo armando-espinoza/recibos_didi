@@ -715,7 +715,7 @@ function onFuelToggle() {
   const fi = $('f-fuel');
   fi.disabled = !on;
   if (on) {
-    fi.value = (( parseFloat($('f-base').value) || 0) * 0.25).toFixed(2);
+    fi.value = (( parseFloat($('f-base').value) || 0) * 0.10).toFixed(2);
   } else {
     fi.value = '0';
   }
