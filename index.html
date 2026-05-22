@@ -464,7 +464,7 @@ body {
 
     <!-- Fuel surcharge toggle -->
     <div class="opt-row">
-      <span class="opt-label">Fuel Surcharge <span class="badge" style="font-size:9px;font-weight:600;color:var(--didi);background:#FFF3EE;padding:1px 5px;border-radius:10px;">OPCIONAL · 25%</span></span>
+      <span class="opt-label">Fuel Surcharge <span class="badge" style="font-size:9px;font-weight:600;color:var(--didi);background:#FFF3EE;padding:1px 5px;border-radius:10px;">OPCIONAL · 10%</span></span>
       <label class="toggle-pill">
         <input type="checkbox" id="f-fuel-on" checked onchange="onFuelToggle()">
         <span class="pill-track"><span class="pill-thumb"></span></span>
@@ -705,7 +705,7 @@ function onMinChange() {
 function onBaseChange() {
   const base = parseFloat($('f-base').value) || 0;
   $('f-booking').value = (base * 0.25).toFixed(2);
-  if ($('f-fuel-on').checked) $('f-fuel').value = (base * 0.25).toFixed(2);
+  if ($('f-fuel-on').checked) $('f-fuel').value = (base * 0.10).toFixed(2);
   sync();
 }
 
