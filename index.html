@@ -705,7 +705,7 @@ function onMinChange() {
 function onBaseChange() {
   const base = parseFloat($('f-base').value) || 0;
   $('f-booking').value = (base * 0.25).toFixed(2);
-  if ($('f-fuel-on').checked) $('f-fuel').value = (base * 0.25).toFixed(2);
+  if ($('f-fuel-on').checked) $('f-fuel').value = (base * 0.10).toFixed(2);
   sync();
 }
 
