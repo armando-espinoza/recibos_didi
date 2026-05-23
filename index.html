@@ -136,6 +136,29 @@ body {
 .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
+/* ── SWAP ROUTE ── */
+.route-wrap { position: relative; }
+.swap-btn {
+  position: absolute;
+  right: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 26px; height: 26px;
+  background: #fff;
+  border: 1.5px solid #E0E0E0;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, box-shadow .15s, transform .2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  flex-shrink: 0;
+  z-index: 1;
+}
+.swap-btn:hover {
+  border-color: var(--didi);
+  box-shadow: 0 2px 8px rgba(255,108,47,.2);
+}
+.swap-btn:active { transform: translateY(-50%) rotate(180deg); }
+
 /* optional row */
 .opt-row {
   display: flex;
@@ -215,16 +238,21 @@ body {
   flex-shrink: 0;
 }
 
+/* Banner = logo + fecha + título + hero, todo sobre fondo gris */
+.rc-banner {
+  background: #EDF0F5;
+  overflow: hidden;
+}
 .rc-head { padding: 14px 18px 0; }
 .rc-logo { width: 30px; height: 30px; object-fit: contain; display: block; }
-.rc-date { font-size: 12px; color: #999; padding: 9px 18px 0; font-weight: 400; }
+.rc-date { font-size: 12px; color: #888; padding: 9px 18px 0; font-weight: 400; }
 .rc-title { font-size: 19px; font-weight: 700; color: #111; padding: 5px 18px 0; line-height: 1.3; }
 
 .rc-hero {
   height: 106px;
-  background: #EDF0F5;
   overflow: hidden;
   margin-top: 2px;
+  /* background removido: lo hereda de .rc-banner */
 }
 .rc-hero img {
   width: 100%; height: 100%;
@@ -430,13 +458,20 @@ body {
   <!-- Ruta -->
   <div class="fsec">
     <div class="fsec-head">Ruta</div>
-    <div class="field">
-      <label>Origen</label>
-      <input id="f-origin" value="Angel de la Independencia 365" oninput="sync()">
-    </div>
-    <div class="field">
-      <label>Destino</label>
-      <input id="f-dest" value="WeWork Espacio de Oficinas &amp; Coworking" oninput="sync()">
+    <div class="route-wrap">
+      <div class="field" style="padding-right:34px;">
+        <label>Origen</label>
+        <input id="f-origin" value="Angel de la Independencia 365" oninput="sync()">
+      </div>
+      <button class="swap-btn" onclick="swapRoute()" title="Intercambiar origen y destino">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--didi)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+        </svg>
+      </button>
+      <div class="field" style="padding-right:34px;">
+        <label>Destino</label>
+        <input id="f-dest" value="WeWork Espacio de Oficinas &amp; Coworking" oninput="sync()">
+      </div>
     </div>
     <div class="g2">
       <div class="field">
@@ -530,6 +565,9 @@ body {
   <!-- RECEIPT -->
   <div id="receipt">
 
+    <!-- Banner: fondo gris cubre logo + fecha + título + hero -->
+    <div class="rc-banner">
+
     <div class="rc-head">
       <img class="rc-logo" src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAaABkDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAABQYDAQj/xAArEAABAwIEBAUFAAAAAAAAAAABAgMEABEFBhIhEzFBURQyYYGhFSJCRXH/xAAWAQEBAQAAAAAAAAAAAAAAAAAEBQP/xAAiEQACAgICAgIDAAAAAAAAAAABAgMEABEhMUFxBRJRgfH/2gAMAwEAAhEDEQA/APT3jGoitMmcAtzc8V7ST0uBew9hau/VoCf2bCz244sPmo3OzEV/OeFomI0xHGw2q6iLnUrr/SKYVk/LqUFSohAAuSXl7fNTRasySOsajSnXJI8b/ByuadSKKN5WbbjfABHevJGNuuvrAksPqU4E3QNZ0K62I5WPe1+1NVA5ExCTOE5K3NcRhaW432gWSL7X67aedX1NqzixEJF6OT7tZqsxibsf3AMbg4ZmSAlmenSrzNyWeaT39RQL2ScacbEZ3MTz8D0B3T2N1be9XCY8dK1rSw0FLN1EIF1Hue9aIAbvoGm/O216ymoQTN9nHPsjfvXebV/k7NdPojceNgHXrY4/WBYfCgYLhYjwkpWW/Kk/mr0v5lE7b09WYYY4we4LfFAsF6RqAPPetKXGiooVRoDBSSNIxZjsnP/Z" alt="DiDi">
     </div>
@@ -539,7 +577,8 @@ body {
 
     <div class="rc-hero">
       <img src="data:image/png;base64,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" alt="DiDi ride">
-    </div>
+    </div><!-- /rc-hero -->
+    </div><!-- /rc-banner -->
 
     <!-- Total -->
     <div class="rc-total">
@@ -682,6 +721,14 @@ function diffMinutes(t1, t2) {
   return d;
 }
 
+/* Formatea minutos → "25 min" | "1 h 10 min" | "2 h" */
+function fmtDuration(totalMin) {
+  if (totalMin < 60) return `${totalMin} min`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
 /* ══ REACTIVE TIME INPUTS ══════════════════════ */
 function onT1Change() {
   // t1 changed → keep duration fixed, recalc t2
@@ -739,6 +786,16 @@ function getCardMeta(type, card4) {
   return { color: colors[type]||'#333', label: labels[type]||type, badge: badges[type]||type };
 }
 
+/* ══ SWAP ORIGIN ↔ DESTINATION ═════════════════ */
+function swapRoute() {
+  const originEl = $('f-origin');
+  const destEl   = $('f-dest');
+  const tmp      = originEl.value;
+  originEl.value = destEl.value;
+  destEl.value   = tmp;
+  sync();
+}
+
 /* ══ MAIN SYNC ════════════════════════════════ */
 function sync() {
   const name    = $('f-name').value || 'Pasajero';
@@ -770,7 +827,7 @@ function sync() {
 
   // Breakdown
   $('rc-base').textContent    = fmt(base);
-  $('rc-dur').textContent     = `${minV} min`;
+  $('rc-dur').textContent     = fmtDuration(minV);
   $('rc-booking').textContent = fmt(booking);
   $('rc-fuel').textContent    = fmt(fuel);
   $('rc-fuel-row').style.display = $('f-fuel-on').checked ? '' : 'none';
@@ -793,7 +850,7 @@ function sync() {
   $('rc-auth').innerHTML = `To make sure you’re using a valid payment method, we placed a temporary authorization hold of <strong>${fT}</strong> on your account at the start of your trip. Your trip was paid for using this hold amount.`;
 
   // Trip
-  $('rc-meta').textContent   = `${km} km | ${minV} min`;
+  $('rc-meta').textContent   = `${km} km | ${fmtDuration(minV)}`;
   $('rc-service').textContent = service;
   $('rc-t1').textContent     = fmtTime(t1);
   $('rc-t2').textContent     = fmtTime(t2);
@@ -802,25 +859,43 @@ function sync() {
 }
 
 /* ══ PDF EXPORT ════════════════════════════════
-   Senior approach:
-   - Scale 3× for high DPI
-   - PNG for lossless quality  
-   - Custom page size = receipt size (no zoom needed)
-   - Wait for images to load before capture
+   High-quality approach:
+   - Scale 4× → ~384 DPI efectivo en el PDF (vs 288 DPI con scale 3)
+   - PNG lossless sin compresión DEFLATE para máxima fidelidad
+   - Preload explícito de todas las imágenes antes del capture
+   - letterRendering: true para texto nítido
+   - foreignObjectRendering: false para estabilidad cross-browser
 ════════════════════════════════════════════════ */
 async function downloadPDF() {
   const ov = $('overlay');
   ov.classList.add('on');
 
   try {
-    await new Promise(r => setTimeout(r, 80));
+    // 1. Esperar a que TODAS las imágenes del recibo estén completamente cargadas
+    //    (crítico para imágenes base64 grandes como el hero del carro)
+    const images = document.querySelectorAll('#receipt img');
+    await Promise.all([...images].map(img =>
+      new Promise(resolve => {
+        if (img.complete && img.naturalWidth > 0) {
+          resolve();
+        } else {
+          img.onload  = resolve;
+          img.onerror = resolve; // no bloquear si falla
+        }
+      })
+    ));
+
+    // 2. Micro-delay para que el browser termine de pintar
+    await new Promise(r => setTimeout(r, 120));
 
     const receipt = $('receipt');
     const W = receipt.offsetWidth;
     const H = receipt.offsetHeight;
 
+    // 3. Captura a 4× = ~384 DPI efectivos en el PDF final
+    //    Cada px original se representa con 4 px de canvas → imágenes notablemente más nítidas
     const canvas = await html2canvas(receipt, {
-      scale: 3,
+      scale: 4,                     // ↑ de 3 a 4: mayor densidad de píxeles
       useCORS: true,
       allowTaint: false,
       backgroundColor: '#ffffff',
@@ -829,11 +904,14 @@ async function downloadPDF() {
       height: H,
       scrollX: 0,
       scrollY: 0,
-      imageTimeout: 10000,
+      imageTimeout: 20000,          // ↑ más tiempo para imágenes base64 pesadas
+      letterRendering: true,        // texto más nítido (especialmente tamaños pequeños)
+      foreignObjectRendering: false, // más estable cross-browser
     });
 
     const { jsPDF } = window.jspdf;
-    const PX2MM = 25.4 / 96; // exact: 1px at 96dpi = 0.26458mm
+    // 1px CSS a 96 DPI = 0.26458mm exacto
+    const PX2MM = 25.4 / 96;
     const wMM = W * PX2MM;
     const hMM = H * PX2MM;
 
@@ -841,12 +919,14 @@ async function downloadPDF() {
       orientation: 'portrait',
       unit: 'mm',
       format: [wMM, hMM],
-      compress: true,
+      compress: false, // sin compresión a nivel PDF → preserva integridad de la imagen
     });
 
-    // Use PNG for lossless quality
+    // 4. PNG lossless + compresión 'NONE' = máxima calidad sin artefactos
+    //    (con PNG la calidad es siempre lossless, pero 'NONE' evita
+    //     que jsPDF aplique un segundo pase DEFLATE sobre los datos ya PNG)
     const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', 0, 0, wMM, hMM, '', 'FAST');
+    pdf.addImage(imgData, 'PNG', 0, 0, wMM, hMM, '', 'NONE');
 
     const name = $('f-name').value || 'recibo';
     const date = $('f-date').value || '';
