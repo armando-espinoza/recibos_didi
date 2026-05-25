@@ -955,11 +955,6 @@ async function downloadPDF() {
     const imgData = canvas.toDataURL('image/png');
     pdf.addImage(imgData, 'PNG', posX, posY, finalW, finalH, '', 'NONE');
 
-    // ── Segunda página completamente en blanco ──────────────────────────────
-    pdf.addPage('a4', 'portrait');
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(0, 0, PAGE_W, PAGE_H, 'F');
-
     // ── Nombre del archivo SIN el nombre del pasajero ──────────────────────
     const date = $('f-date').value || '';
     pdf.save(`DiDi_Receipt_${date}.pdf`);
