@@ -223,13 +223,13 @@ body {
   letter-spacing: .1em; text-transform: uppercase;
   color: #AAA;
   align-self: flex-start;
-  margin-left: max(0px, calc(50% - 200px));
+  margin-left: max(0px, calc(50% - 215px));
 }
 
 /* ── RECEIPT ─────────────────── */
-/* The receipt is rendered exactly at 390px for crisp PDF */
+/* 430px = proporción del recibo original DiDi */
 #receipt {
-  width: 390px;
+  width: 430px;
   background: #fff;
   overflow: hidden;
   box-shadow: 0 2px 40px rgba(0,0,0,.18);
@@ -243,16 +243,15 @@ body {
   background: #EDF0F5;
   overflow: hidden;
 }
-.rc-head { padding: 14px 18px 0; }
-.rc-logo { width: 30px; height: 30px; object-fit: contain; display: block; }
-.rc-date { font-size: 12px; color: #888; padding: 9px 18px 0; font-weight: 400; }
-.rc-title { font-size: 19px; font-weight: 700; color: #111; padding: 5px 18px 0; line-height: 1.3; }
+.rc-head { padding: 18px 24px 0; }
+.rc-logo { width: 34px; height: 34px; object-fit: contain; display: block; }
+.rc-date { font-size: 12.5px; color: #888; padding: 10px 24px 0; font-weight: 400; }
+.rc-title { font-size: 22px; font-weight: 700; color: #111; padding: 6px 24px 14px; line-height: 1.3; }
 
 .rc-hero {
-  height: 106px;
+  height: 130px;
   overflow: hidden;
-  margin-top: 2px;
-  /* background removido: lo hereda de .rc-banner */
+  /* background hereda de .rc-banner */
 }
 .rc-hero img {
   width: 100%; height: 100%;
@@ -262,30 +261,30 @@ body {
 /* total */
 .rc-total {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 18px 11px;
+  padding: 16px 24px 14px;
   border-bottom: 1px solid #F0F0F0;
 }
-.rc-total-lbl { font-size: 14px; font-weight: 700; color: #111; }
-.rc-total-val { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -.02em; }
+.rc-total-lbl { font-size: 16px; font-weight: 700; color: #111; }
+.rc-total-val { font-size: 22px; font-weight: 700; color: #111; letter-spacing: -.02em; }
 
 /* breakdown */
 .rc-section {
-  padding: 12px 18px 11px;
+  padding: 14px 24px 12px;
   border-bottom: 1px solid #F0F0F0;
 }
-.rc-section-title { font-size: 12px; font-weight: 700; color: #111; margin-bottom: 7px; }
+.rc-section-title { font-size: 12.5px; font-weight: 700; color: #111; margin-bottom: 9px; }
 .rc-line {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 2px 0;
+  padding: 3px 0;
 }
-.rc-line-lbl { font-size: 11.5px; color: #999; }
-.rc-line-val { font-size: 11.5px; color: #999; }
+.rc-line-lbl { font-size: 12px; color: #999; }
+.rc-line-val { font-size: 12px; color: #999; }
 .rc-line-val.neg { color: #2E7D32; }
 
 /* payment */
 .rc-pay-row {
   display: flex; align-items: center; justify-content: space-between;
-  margin-top: 6px;
+  margin-top: 7px;
 }
 .rc-pay-left { display: flex; align-items: center; gap: 7px; }
 .rc-badge {
@@ -298,72 +297,72 @@ body {
   line-height: 1;
   flex-shrink: 0;
 }
-.rc-pay-lbl { font-size: 12.5px; color: #555; }
-.rc-pay-val { font-size: 12.5px; color: #555; }
+.rc-pay-lbl { font-size: 13px; color: #555; }
+.rc-pay-val { font-size: 13px; color: #555; }
 
 /* question */
 .rc-question {
-  padding: 10px 18px;
-  display: flex; align-items: center; gap: 7px;
+  padding: 12px 24px;
+  display: flex; align-items: center; gap: 8px;
   border-bottom: 1px solid #F0F0F0;
   border-top: 1px solid #F0F0F0;
 }
 .rc-q-dot {
-  width: 17px; height: 17px; background: #F2F2F2; border-radius: 50%;
+  width: 18px; height: 18px; background: #F2F2F2; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.rc-question-lbl { font-size: 12px; color: #777; }
-.rc-question-chev { margin-left: auto; color: #CCC; font-size: 13px; }
+.rc-question-lbl { font-size: 12.5px; color: #777; }
+.rc-question-chev { margin-left: auto; color: #CCC; font-size: 14px; }
 
 /* auth hold */
 .rc-auth {
-  padding: 10px 18px;
-  font-size: 10.5px; color: #AAA; line-height: 1.6;
+  padding: 12px 24px;
+  font-size: 11px; color: #AAA; line-height: 1.65;
   border-bottom: 1px solid #F0F0F0;
 }
 
 /* trip */
-.rc-trip { padding: 13px 18px 0; }
+.rc-trip { padding: 16px 24px 0; }
 .rc-trip-header {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 9px;
+  margin-bottom: 10px;
 }
-.rc-trip-title { font-size: 14px; font-weight: 700; color: #111; }
+.rc-trip-title { font-size: 15px; font-weight: 700; color: #111; }
 .rc-trip-meta { font-size: 12px; color: #999; }
 .rc-service {
-  display: flex; align-items: center; gap: 6px;
-  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 7px;
+  margin-bottom: 14px;
 }
-.rc-service-lbl { font-size: 12.5px; font-weight: 500; color: #555; }
+.rc-service-lbl { font-size: 13px; font-weight: 500; color: #555; }
 
 /* timeline */
-.rc-tl { position: relative; padding-left: 15px; margin-bottom: 14px; }
+.rc-tl { position: relative; padding-left: 18px; margin-bottom: 16px; }
 .rc-tl-line {
-  position: absolute; left: 3.5px; top: 9px; bottom: 9px;
+  position: absolute; left: 4px; top: 10px; bottom: 10px;
   width: 1.5px; background: #E0E0E0;
 }
-.rc-stop { position: relative; margin-bottom: 12px; }
+.rc-stop { position: relative; margin-bottom: 14px; }
 .rc-stop:last-child { margin-bottom: 0; }
 .rc-dot {
-  position: absolute; left: -15px; top: 3.5px;
-  width: 8px; height: 8px; border-radius: 50%;
+  position: absolute; left: -18px; top: 4px;
+  width: 9px; height: 9px; border-radius: 50%;
 }
 .rc-dot.g { background: #34C759; }
 .rc-dot.o { background: #FF6C2F; }
-.rc-stop-time { font-size: 11px; color: #AAA; }
-.rc-stop-addr { font-size: 12.5px; font-weight: 500; color: #1A1A1A; margin-top: 1.5px; }
+.rc-stop-time { font-size: 11.5px; font-weight: 600; color: #555; }
+.rc-stop-addr { font-size: 13px; font-weight: 400; color: #1A1A1A; margin-top: 2px; }
 
 /* assist */
 .rc-assist {
-  padding: 13px 18px 15px;
+  padding: 14px 24px 18px;
   border-top: 1px solid #F0F0F0;
 }
-.rc-assist-title { font-size: 13px; font-weight: 700; color: #111; margin-bottom: 6px; }
+.rc-assist-title { font-size: 13.5px; font-weight: 700; color: #111; margin-bottom: 7px; }
 .rc-assist-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 2px 0;
+  padding: 3px 0;
 }
-.rc-assist-lbl { font-size: 12.5px; color: #666; }
+.rc-assist-lbl { font-size: 13px; color: #666; }
 .rc-assist-chev { color: #CCC; font-size: 14px; }
 
 /* ── DOWNLOAD ────────────── */
@@ -872,7 +871,6 @@ async function downloadPDF() {
 
   try {
     // 1. Esperar a que TODAS las imágenes del recibo estén completamente cargadas
-    //    (crítico para imágenes base64 grandes como el hero del carro)
     const images = document.querySelectorAll('#receipt img');
     await Promise.all([...images].map(img =>
       new Promise(resolve => {
@@ -880,7 +878,7 @@ async function downloadPDF() {
           resolve();
         } else {
           img.onload  = resolve;
-          img.onerror = resolve; // no bloquear si falla
+          img.onerror = resolve;
         }
       })
     ));
@@ -893,9 +891,8 @@ async function downloadPDF() {
     const H = receipt.offsetHeight;
 
     // 3. Captura a 4× = ~384 DPI efectivos en el PDF final
-    //    Cada px original se representa con 4 px de canvas → imágenes notablemente más nítidas
     const canvas = await html2canvas(receipt, {
-      scale: 4,                     // ↑ de 3 a 4: mayor densidad de píxeles
+      scale: 4,
       useCORS: true,
       allowTaint: false,
       backgroundColor: '#ffffff',
@@ -904,33 +901,68 @@ async function downloadPDF() {
       height: H,
       scrollX: 0,
       scrollY: 0,
-      imageTimeout: 20000,          // ↑ más tiempo para imágenes base64 pesadas
-      letterRendering: true,        // texto más nítido (especialmente tamaños pequeños)
-      foreignObjectRendering: false, // más estable cross-browser
+      imageTimeout: 20000,
+      letterRendering: true,
+      foreignObjectRendering: false,
     });
 
     const { jsPDF } = window.jspdf;
-    // 1px CSS a 96 DPI = 0.26458mm exacto
-    const PX2MM = 25.4 / 96;
-    const wMM = W * PX2MM;
-    const hMM = H * PX2MM;
 
+    // ── Configuración de márgenes (en mm) ──────────────────────────────────
+    const MARGIN_TOP    = 20;   // margen superior
+    const MARGIN_BOTTOM = 20;   // margen inferior
+    const MARGIN_LEFT   = 20;   // margen izquierdo
+    const MARGIN_RIGHT  = 20;   // margen derecho
+
+    // Tamaño de página A4 en mm
+    const PAGE_W = 210;
+    const PAGE_H = 297;
+
+    // Área disponible dentro de los márgenes
+    const availW = PAGE_W - MARGIN_LEFT - MARGIN_RIGHT;
+    const availH = PAGE_H - MARGIN_TOP  - MARGIN_BOTTOM;
+
+    // 1px CSS a 96 DPI = 0.26458mm exacto
+    const PX2MM  = 25.4 / 96;
+    const imgW   = W * PX2MM;   // ancho natural de la imagen en mm
+    const imgH   = H * PX2MM;   // alto  natural de la imagen en mm
+
+    // Escalar la imagen para que quepa en el área disponible manteniendo proporción
+    const scaleW = availW / imgW;
+    const scaleH = availH / imgH;
+    const scale  = Math.min(scaleW, scaleH, 1); // nunca ampliar, solo reducir si hace falta
+
+    const finalW = imgW * scale;
+    const finalH = imgH * scale;
+
+    // Centrar horizontalmente; alinear al margen superior
+    const posX = MARGIN_LEFT + (availW - finalW) / 2;
+    const posY = MARGIN_TOP;
+
+    // ── Crear PDF A4 con primera página ────────────────────────────────────
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: [wMM, hMM],
-      compress: false, // sin compresión a nivel PDF → preserva integridad de la imagen
+      format: 'a4',
+      compress: false,
     });
 
-    // 4. PNG lossless + compresión 'NONE' = máxima calidad sin artefactos
-    //    (con PNG la calidad es siempre lossless, pero 'NONE' evita
-    //     que jsPDF aplique un segundo pase DEFLATE sobre los datos ya PNG)
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', 0, 0, wMM, hMM, '', 'NONE');
+    // Fondo blanco explícito en página 1
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, PAGE_W, PAGE_H, 'F');
 
-    const name = $('f-name').value || 'recibo';
+    // Insertar imagen del recibo con márgenes amplios
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', posX, posY, finalW, finalH, '', 'NONE');
+
+    // ── Segunda página completamente en blanco ──────────────────────────────
+    pdf.addPage('a4', 'portrait');
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, PAGE_W, PAGE_H, 'F');
+
+    // ── Nombre del archivo SIN el nombre del pasajero ──────────────────────
     const date = $('f-date').value || '';
-    pdf.save(`DiDi_Receipt_${name}_${date}.pdf`);
+    pdf.save(`DiDi_Receipt_${date}.pdf`);
 
   } catch(e) {
     alert('Error al generar PDF:\n' + e.message);
